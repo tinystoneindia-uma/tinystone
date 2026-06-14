@@ -1,9 +1,12 @@
 /* ════════════════════════════════════════════════════════════
    BASKET.JS
    Cart state + UI: add/remove items, quantity changes,
-   drawer open/close, and WhatsApp checkout.
+   drawer open/close, promo discount display, and checkout
+   (opens the shipping modal before sending to WhatsApp).
    Depends on: config.js (basket, WA_NUMBER, CAT_EMOJI),
-               toast.js (showToast), product-render.js (parseImgs)
+               toast.js (showToast), product-render.js (parseImgs),
+               promo.js (appliedPromo, calcDiscount),
+               checkout.js (openShipModal, _doCheckoutWA)
    ════════════════════════════════════════════════════════════ */
 
 function addToBasket(id) {
@@ -40,10 +43,35 @@ function changeQty(id, delta) {
 }
 
 function updateBasketUI() {
-  const total = basket.reduce((s, b) => s + b.price * b.qty, 0);
-  const count = basket.reduce((s, b) => s + b.qty, 0);
+  const subtotal    = basket.reduce((s, b) => s + b.price * b.qty, 0);
+  const count       = basket.reduce((s, b) => s + b.qty, 0);
+  const discountAmt = (typeof calcDiscount === 'function') ? calcDiscount(subtotal) : 0;
+  const total       = subtotal - discountAmt;
+
   document.getElementById('nav-basket-count').textContent = count;
+
+  const subtotalEl = document.getElementById('basket-subtotal');
+  if (subtotalEl) subtotalEl.textContent = '₹' + subtotal.toLocaleString('en-IN');
+
   document.getElementById('basket-total').textContent = '₹' + total.toLocaleString('en-IN');
+
+  // Discount row (only present if promo applied)
+  const discRow = document.getElementById('discount-row');
+  if (discRow) {
+    if (typeof appliedPromo !== 'undefined' && appliedPromo && subtotal > 0) {
+      discRow.style.display = 'flex';
+      const labelEl  = document.getElementById('discount-label');
+      const amountEl = document.getElementById('discount-amount');
+      if (labelEl)  labelEl.textContent  = appliedPromo.label;
+      if (amountEl) amountEl.textContent = '−₹' + discountAmt.toLocaleString('en-IN');
+    } else {
+      discRow.style.display = 'none';
+    }
+  }
+
+  // Checkout button enable/disable
+  const checkoutBtn = document.getElementById('basket-checkout-btn');
+  if (checkoutBtn) checkoutBtn.disabled = basket.length === 0;
 
   const foot    = document.getElementById('basket-foot');
   const itemsEl = document.getElementById('basket-items');
@@ -88,10 +116,15 @@ function closeBasket() {
   document.getElementById('basket-drawer').classList.remove('open');
 }
 
+// Checkout now opens the shipping/address modal first (checkout.js).
+// The modal's "Confirm" or "Skip" buttons trigger _doCheckoutWA() which
+// builds the itemized WhatsApp message (incl. promo discount + address).
 function checkoutWA() {
   if (!basket.length) return;
-  const lines = basket.map(b => `• *${b.name}* × ${b.qty} = ₹${(b.price * b.qty).toLocaleString('en-IN')}`).join('\n');
-  const total = basket.reduce((s, b) => s + b.price * b.qty, 0);
-  const msg = `Hi! I'd like to place an order from Tiny Threads Jewells:\n\n${lines}\n\n*Total: ₹${total.toLocaleString('en-IN')}*\n\nPlease confirm availability and share payment & delivery details.`;
-  window.open('https://wa.me/' + WA_NUMBER + '?text=' + encodeURIComponent(msg), '_blank');
+  if (typeof openShipModal === 'function') {
+    openShipModal();
+  } else {
+    // Fallback if checkout.js isn't loaded
+    _doCheckoutWA(null);
+  }
 }

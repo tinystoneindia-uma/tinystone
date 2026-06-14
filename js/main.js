@@ -6,3 +6,6 @@
 
 // Start fetching products as soon as the page loads (before splash exits)
 initProducts();
+
+// Load active promo codes (used for basket discounts)
+loadPromoCodes();

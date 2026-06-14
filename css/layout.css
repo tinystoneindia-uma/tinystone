@@ -654,6 +654,12 @@
       font-size: 15px;
     }
     .basket-total-row strong { font-size: 18px; color: var(--gold-dark); }
+    /* Subtotal row sits right above the promo box — less bottom margin */
+    .basket-foot .basket-total-row:first-child {
+      margin-bottom: .4rem;
+      font-size: 13.5px;
+      color: var(--muted);
+    }
     .basket-checkout-btn {
       width: 100%;
       background: #25D366;

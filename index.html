@@ -33,6 +33,8 @@
   <link rel="stylesheet" href="css/layout.css">
   <link rel="stylesheet" href="css/pages.css">
   <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/promo.css">
+  <link rel="stylesheet" href="css/checkout.css">
   <link rel="stylesheet" href="css/responsive.css">
 </head>
 
@@ -260,6 +262,26 @@
     </div>
     <div class="basket-foot" id="basket-foot" style="display:none;">
       <div class="basket-total-row">
+        <span>Subtotal</span>
+        <span id="basket-subtotal">₹0</span>
+      </div>
+      <div class="promo-wrap">
+        <div class="promo-row">
+          <input class="promo-input" id="promo-input" type="text" placeholder="Promo code" maxlength="20"
+            oninput="this.value=this.value.toUpperCase()">
+          <button class="promo-apply-btn" id="promo-apply-btn" onclick="applyPromo()">Apply</button>
+        </div>
+        <div class="promo-msg" id="promo-msg"></div>
+      </div>
+      <div class="discount-row" id="discount-row" style="display:none;">
+        <span id="discount-label"></span>
+        <span style="display:flex;align-items:center;gap:6px;">
+          <span id="discount-amount" style="color:#25D366;font-weight:700;"></span>
+          <button class="discount-remove" onclick="removePromo()">✕</button>
+        </span>
+      </div>
+      <div class="basket-divider"></div>
+      <div class="basket-total-row">
         <span>Total</span>
         <strong id="basket-total">₹0</strong>
       </div>
@@ -267,8 +289,80 @@
         <svg style="width:18px;height:18px;fill:white;flex-shrink:0;" viewBox="0 0 24 24">
           <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
         </svg>
-        Send Order on WhatsApp
+        Checkout via WhatsApp
       </button>
+    </div>
+  </div>
+
+  <!-- ==================== SHIPPING / ADDRESS MODAL ==================== -->
+  <div class="ship-overlay" id="shipOverlay" onclick="shipOverlayClick(event)">
+    <div class="ship-modal" role="dialog" aria-modal="true">
+      <div class="ship-modal-head">
+        <div class="ship-modal-title">📦 Where should we ship?</div>
+        <div style="display:flex;align-items:center;gap:8px;">
+          <button class="ship-skip" onclick="shipSkip()"
+            style="text-decoration:none;padding:6px 12px;border:1.5px solid var(--border);border-radius:20px;font-size:12px;color:var(--muted);background:var(--warm);">Skip
+            &rarr;</button>
+          <button class="ship-modal-close" onclick="closeShipModal()" aria-label="Close">&#x2715;</button>
+        </div>
+      </div>
+      <div class="ship-basket-bar" id="shipBasketBar">Loading basket...</div>
+      <div class="ship-form">
+        <span class="ship-sec-label">Contact</span>
+        <div class="ship-field" id="sf-name">
+          <label>Full Name <span class="req">*</span></label>
+          <input type="text" id="sinp-name" placeholder="e.g. Priya Sharma" autocomplete="name" inputmode="text" maxlength="80">
+          <div class="ship-err">Please enter your name</div>
+        </div>
+        <div class="ship-field" id="sf-mobile">
+          <label>Mobile Number <span class="req">*</span></label>
+          <input type="tel" id="sinp-mobile" placeholder="10-digit mobile" autocomplete="tel" inputmode="numeric" maxlength="10">
+          <div class="ship-err">Enter a valid 10-digit number</div>
+        </div>
+        <span class="ship-sec-label">Delivery Address</span>
+        <div class="ship-row">
+          <div class="ship-field" id="sf-pin" style="flex:0 0 130px;">
+            <label>PIN Code <span class="req">*</span></label>
+            <input type="text" id="sinp-pin" placeholder="6 digits" autocomplete="postal-code" inputmode="numeric" maxlength="6">
+            <div class="ship-pin-st" id="shipPinSt"></div>
+            <div class="ship-err">Enter valid 6-digit PIN</div>
+          </div>
+          <div class="ship-field" id="sf-city" style="flex:1;">
+            <label>City <span class="req">*</span></label>
+            <input type="text" id="sinp-city" placeholder="Auto-filled" autocomplete="address-level2" maxlength="60">
+            <div class="ship-err">City is required</div>
+          </div>
+        </div>
+        <div class="ship-field" id="sf-area">
+          <label>Area / Locality <span class="req">*</span></label>
+          <select id="sinp-area">
+            <option value="">Enter PIN to load areas...</option>
+          </select>
+          <div class="ship-err">Please select your area</div>
+        </div>
+        <div class="ship-field">
+          <label>State</label>
+          <input type="text" id="sinp-state" placeholder="Auto-filled" autocomplete="address-level1" maxlength="60"
+            readonly style="background:#FAFAFA;color:var(--muted);">
+        </div>
+        <div class="ship-field" id="sf-addr1">
+          <label>Address Line 1 <span class="req">*</span></label>
+          <input type="text" id="sinp-addr1" placeholder="House / Flat no., Building name" autocomplete="address-line1" maxlength="120">
+          <div class="ship-err">Address is required</div>
+        </div>
+        <div class="ship-field">
+          <label>Address Line 2 <span style="color:var(--muted);font-weight:400;">(optional)</span></label>
+          <input type="text" id="sinp-addr2" placeholder="Street, Landmark" autocomplete="address-line2" maxlength="120">
+        </div>
+      </div>
+      <div class="ship-actions">
+        <button class="ship-submit" id="shipSubmitBtn" onclick="shipSubmit()">
+          <svg width="19" height="19" viewBox="0 0 24 24" fill="white">
+            <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" />
+          </svg>
+          Confirm & Checkout on WhatsApp
+        </button>
+      </div>
     </div>
   </div>
 
@@ -525,7 +619,9 @@
   <script src="js/supabase-data.js"></script>
   <script src="js/toast.js"></script>
   <script src="js/navigation.js"></script>
+  <script src="js/promo.js"></script>
   <script src="js/basket.js"></script>
+  <script src="js/checkout.js"></script>
   <script src="js/product-render.js"></script>
   <script src="js/pdp.js"></script>
   <script src="js/main.js"></script>
