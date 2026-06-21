@@ -92,17 +92,28 @@ async function renderCategoryPage(cat) {
       <p>${info.desc}</p>
     </div>
     <div class="filter-bars-wrap" id="fbars-${cat}">
-      <div class="filter-bar" id="filter-bar-${cat}">
-        <div class="filter-chip active" data-filter="all">All</div>
-        <div class="filter-chip" data-filter="under500">Under ₹500</div>
-        <div class="filter-chip" data-filter="500to1000">₹500–₹1000</div>
-        <div class="filter-chip" data-filter="above1000">Above ₹1000</div>
-        <div class="filter-chip" data-filter="New">New</div>
-        <div class="filter-chip" data-filter="Trending">Trending</div>
-      </div>
-      <div class="type-bar" id="type-bar-${cat}">
-        <span class="type-bar-label">Type</span>
-        <div class="type-chip active" data-type="all">All</div>
+      <div class="fs-bar">
+        <button class="fs-btn" id="fs-filter-btn-${cat}" onclick="openFilterTray('${cat}','filter')">
+          <span class="fs-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.4" stroke-linecap="round">
+              <line x1="4" y1="6" x2="20" y2="6"/><circle cx="9" cy="6" r="2" fill="white" stroke="none"/>
+              <line x1="4" y1="12" x2="20" y2="12"/><circle cx="16" cy="12" r="2" fill="white" stroke="none"/>
+              <line x1="4" y1="18" x2="20" y2="18"/><circle cx="11" cy="18" r="2" fill="white" stroke="none"/>
+            </svg>
+          </span>
+          Filter
+          <span class="fs-badge" id="fs-filter-badge-${cat}" style="display:none;">0</span>
+        </button>
+        <span class="fs-sep"></span>
+        <button class="fs-btn" id="fs-sort-btn-${cat}" onclick="openFilterTray('${cat}','sort')">
+          <span class="fs-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M7 4v15M7 19l-3.5-3.5M7 19l3.5-3.5"/>
+              <path d="M17 20V5M17 5l3.5 3.5M17 5l-3.5 3.5"/>
+            </svg>
+          </span>
+          Sort
+        </button>
       </div>
     </div>
     <div class="section prod-section-wrap" id="prod-section-${cat}">
@@ -112,80 +123,35 @@ async function renderCategoryPage(cat) {
   // Fetch products
   const prods = await fetchProductsByCategory(cat);
 
-  // Populate Type bar with unique subcategories from fetched data
-  const typeBar  = document.getElementById('type-bar-' + cat);
-  const subtypes = [...new Set(prods.map(p => p.subcategory).filter(Boolean))];
-  subtypes.forEach(sub => {
-    const chip = document.createElement('div');
-    chip.className = 'type-chip';
-    chip.dataset.type = sub;
-    chip.textContent = sub;
-    typeBar.appendChild(chip);
-  });
+  // Register this category with the shared filter tray (subcategories + product set)
+  registerCategoryForFilterTray(cat, prods, () => renderFilteredProducts(cat));
 
-  // Active filter state
-  let activePrice = 'all';
-  let activeType  = 'all';
+  // Initial render (no filters/sort applied yet)
+  renderFilteredProducts(cat);
+}
 
-  function applyFilters() {
-    let filtered = [...prods];
-    // Price / badge
-    if (activePrice === 'under500')   filtered = filtered.filter(p => p.price < 500);
-    if (activePrice === 'above1000')  filtered = filtered.filter(p => p.price > 1000);
-    if (activePrice === '500to1000')  filtered = filtered.filter(p => p.price >= 500 && p.price <= 1000);
-    if (activePrice === 'New')        filtered = filtered.filter(p => p.badge === 'New');
-    if (activePrice === 'Trending')   filtered = filtered.filter(p => p.badge === 'Trending');
-    // Type (subcategory)
-    if (activeType !== 'all')         filtered = filtered.filter(p => p.subcategory === activeType);
+// Renders the product grid for a category using whatever filter/sort state
+// is currently held by the shared filter tray (js/filter-tray.js).
+function renderFilteredProducts(cat) {
+  const info    = CATEGORIES[cat] || { emoji: '💎' };
+  const section = document.getElementById('prod-section-' + cat);
+  if (!section) return;
 
-    const section = document.getElementById('prod-section-' + cat);
-    if (!section) return;
-    if (filtered.length === 0) {
-      section.innerHTML = `
-        <div style="text-align:center;padding:3rem 1rem;color:var(--muted)">
-          <div style="font-size:2.5rem;margin-bottom:.8rem;">${info.emoji}</div>
-          <p style="font-size:14px;">No products match this filter.<br>
-          <a href="#" onclick="window['resetFilters_${cat}']();return false;"
-             style="color:var(--gold-dark);font-weight:600;">Clear filters</a>
-          &nbsp;or&nbsp;
-          <a href="https://wa.me/${WA_NUMBER}" target="_blank"
-             style="color:var(--gold-dark)">chat with us</a>.
-          </p>
-        </div>`;
-    } else {
-      section.innerHTML = `<div class="prod-grid">${filtered.map(productCardHTML).join('')}</div>`;
-    }
+  const filtered = getFilteredSortedProducts(cat);
+
+  if (filtered.length === 0) {
+    section.innerHTML = `
+      <div style="text-align:center;padding:3rem 1rem;color:var(--muted)">
+        <div style="font-size:2.5rem;margin-bottom:.8rem;">${info.emoji}</div>
+        <p style="font-size:14px;">No products match this filter.<br>
+        <a href="#" onclick="clearFilterTrayFor('${cat}');return false;"
+           style="color:var(--gold-dark);font-weight:600;">Clear filters</a>
+        &nbsp;or&nbsp;
+        <a href="https://wa.me/${WA_NUMBER}" target="_blank"
+           style="color:var(--gold-dark)">chat with us</a>.
+        </p>
+      </div>`;
+  } else {
+    section.innerHTML = `<div class="prod-grid">${filtered.map(productCardHTML).join('')}</div>`;
   }
-
-  // Global reset hook for the "Clear filters" link inside innerHTML
-  window['resetFilters_' + cat] = function() {
-    activePrice = 'all';
-    activeType  = 'all';
-    el.querySelectorAll('.filter-chip').forEach(c => c.classList.toggle('active', c.dataset.filter === 'all'));
-    el.querySelectorAll('.type-chip').forEach(c => c.classList.toggle('active', c.dataset.type === 'all'));
-    applyFilters();
-  };
-
-  // Wire price/badge chips
-  el.querySelectorAll('.filter-chip').forEach(chip => {
-    chip.addEventListener('click', () => {
-      el.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
-      chip.classList.add('active');
-      activePrice = chip.dataset.filter;
-      applyFilters();
-    });
-  });
-
-  // Wire type chips (including ones added dynamically)
-  el.addEventListener('click', e => {
-    const chip = e.target.closest('.type-chip');
-    if (!chip) return;
-    el.querySelectorAll('.type-chip').forEach(c => c.classList.remove('active'));
-    chip.classList.add('active');
-    activeType = chip.dataset.type;
-    applyFilters();
-  });
-
-  // Initial render
-  applyFilters();
 }
