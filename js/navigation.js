@@ -29,7 +29,7 @@ function enterSite() {
 // ─── PAGE NAVIGATION ─────────────────────────────────────────────────────────
 function showPage(id) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-  document.querySelectorAll('.nav-links li a').forEach(a => a.classList.remove('active'));
+  document.querySelectorAll('.desktop-nav-item').forEach(a => a.classList.remove('active'));
   document.querySelectorAll('.mob-nav-item').forEach(b => b.classList.remove('active'));
 
   const pageEl = document.getElementById('page-' + id);
@@ -37,9 +37,18 @@ function showPage(id) {
   pageEl.classList.add('active');
   window.scrollTo({ top: 0, behavior: 'smooth' });
 
-  // Highlight desktop nav link
-  const navLink = document.querySelector('.nav-links li a[onclick*="' + id + '"]');
-  if (navLink) navLink.classList.add('active');
+  // Highlight + smooth-scroll active link into centre of desktop nav track
+  const deskBtn = document.getElementById('dn-' + id);
+  if (deskBtn) {
+    deskBtn.classList.add('active');
+    const deskTrack = document.getElementById('desktop-nav-track');
+    if (deskTrack) {
+      const btnLeft  = deskBtn.offsetLeft;
+      const btnWidth = deskBtn.offsetWidth;
+      const trackW   = deskTrack.offsetWidth;
+      deskTrack.scrollTo({ left: btnLeft - (trackW / 2) + (btnWidth / 2), behavior: 'smooth' });
+    }
+  }
 
   // Highlight + smooth-scroll active pill into centre of mobile bottom nav track
   const mobBtn = document.getElementById('mn-' + id);
