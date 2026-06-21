@@ -1,0 +1,319 @@
+/* ════════════════════════════════════════════════════════════
+   FILTER-TRAY.CSS
+   Compact "Filter | Sort" sticky button bar (replaces the old
+   always-visible price/type chip rows) + the shared tray/sheet
+   that opens on tap, used identically by every category page.
+   ════════════════════════════════════════════════════════════ */
+
+/* ── COMPACT FILTER / SORT BAR ──
+   Sits directly below the category banner, sticky under the nav.
+   Designed to match the site's gold/cream aesthetic — gold icon
+   chips on a warm cream strip, not generic white system buttons. */
+.filter-bars-wrap {
+  background: var(--warm);
+}
+
+.fs-bar {
+  display: flex;
+  align-items: stretch;
+  background: transparent;
+  border-radius: 14px;
+  margin: .75rem 1.4rem;
+  box-shadow: 0 2px 10px rgba(184,134,11,.10);
+  border: 1.5px solid var(--gold-light);
+  overflow: hidden;
+}
+
+.fs-btn {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background: transparent;
+  border: none;
+  color: var(--gold-dark);
+  padding: 12px 10px;
+  font-size: 13.5px;
+  font-weight: 600;
+  font-family: 'DM Sans', sans-serif;
+  cursor: pointer;
+  transition: background .18s;
+}
+
+.fs-btn:hover,
+.fs-btn.has-active {
+  background: var(--gold-light);
+}
+
+/* gold pipe divider, centred between the two equal halves */
+.fs-sep {
+  width: 2px;
+  flex-shrink: 0;
+  background: linear-gradient(180deg, transparent, var(--gold) 18%, var(--gold) 82%, transparent);
+}
+
+/* gold filled icon chip — replaces the thin grey "Windows 98" stroke icon */
+.fs-icon {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--gold-dark), var(--gold));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.fs-icon svg {
+  width: 12px;
+  height: 12px;
+  stroke: white;
+  fill: none;
+}
+
+.fs-badge {
+  background: var(--gold);
+  color: white;
+  font-size: 10px;
+  font-weight: 700;
+  min-width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 3px;
+  margin-left: -1px;
+}
+
+/* ── SHARED TRAY OVERLAY ──
+   Filter slides in from the LEFT, Sort slides in from the RIGHT.
+   Both are full-height side drawers (js/filter-tray.js toggles the
+   .ftray-from-left / .ftray-from-right class on open). */
+.ftray-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(28, 18, 8, .5);
+  z-index: 9500;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .25s ease;
+  display: flex;
+  align-items: stretch;
+  justify-content: flex-start;
+}
+
+.ftray-overlay.active {
+  opacity: 1;
+  pointer-events: all;
+}
+
+.ftray-sheet {
+  background: white;
+  width: 100%;
+  max-width: 360px;
+  height: 100%;
+  border-radius: 0;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 0 40px rgba(28,18,8,.25);
+  transition: transform .32s cubic-bezier(.32, 1, .6, 1);
+}
+
+/* Filter tray — anchored left, slides in from the left edge */
+.ftray-overlay.ftray-from-left {
+  justify-content: flex-start;
+}
+.ftray-overlay.ftray-from-left .ftray-sheet {
+  border-radius: 0 18px 18px 0;
+  transform: translateX(-100%);
+}
+.ftray-overlay.ftray-from-left.active .ftray-sheet {
+  transform: translateX(0);
+}
+
+/* Sort tray — anchored right, slides in from the right edge */
+.ftray-overlay.ftray-from-right {
+  justify-content: flex-end;
+}
+.ftray-overlay.ftray-from-right .ftray-sheet {
+  border-radius: 18px 0 0 18px;
+  transform: translateX(100%);
+}
+.ftray-overlay.ftray-from-right.active .ftray-sheet {
+  transform: translateX(0);
+}
+
+.ftray-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 1.4rem .8rem;
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+
+.ftray-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.ftray-close {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--gold-light);
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--gold-dark);
+  font-size: 16px;
+  font-weight: 700;
+  flex-shrink: 0;
+  transition: background .15s;
+}
+
+.ftray-close:hover { background: #FFE8B0; }
+
+.ftray-body {
+  flex: 1;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  padding: 1rem 1.4rem;
+}
+
+/* ── FILTER PANEL: Price (left) + Type (right/stacked) ── */
+.ftray-section-row {
+  display: flex;
+  gap: 18px;
+}
+
+.ftray-section-label {
+  flex: 0 0 70px;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--gold-dark);
+  padding-top: 4px;
+}
+
+.ftray-checklist {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.ftray-check,
+.ftray-radio {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 4px;
+  cursor: pointer;
+  font-size: 13.5px;
+  color: var(--text);
+  border-radius: 8px;
+  transition: background .15s;
+}
+
+.ftray-check:hover,
+.ftray-radio:hover { background: var(--warm); }
+
+.ftray-check input[type="checkbox"],
+.ftray-radio input[type="radio"] {
+  width: 17px;
+  height: 17px;
+  accent-color: var(--gold);
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.ftray-divider {
+  height: 1px;
+  background: var(--border);
+  margin: 1rem 0;
+}
+
+.ftray-empty-note {
+  font-size: 12.5px;
+  color: var(--muted);
+  padding: 6px 4px;
+}
+
+/* ── SORT PANEL: single-select list ── */
+.ftray-radiolist {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.ftray-radio { font-size: 14px; padding: 11px 6px; }
+
+/* ── TRAY FOOTER ── */
+.ftray-foot {
+  display: flex;
+  gap: 10px;
+  padding: .9rem 1.4rem;
+  border-top: 1px solid var(--border);
+  flex-shrink: 0;
+}
+
+.ftray-clear-btn {
+  flex: 0 0 auto;
+  background: white;
+  border: 1.5px solid var(--border);
+  color: var(--muted);
+  padding: 12px 18px;
+  border-radius: 14px;
+  font-size: 13.5px;
+  font-weight: 600;
+  font-family: 'DM Sans', sans-serif;
+  cursor: pointer;
+  transition: all .15s;
+}
+
+.ftray-clear-btn:hover {
+  border-color: var(--gold);
+  color: var(--gold-dark);
+}
+
+.ftray-apply-btn {
+  flex: 1;
+  background: var(--gold);
+  color: white;
+  border: none;
+  padding: 12px;
+  border-radius: 14px;
+  font-size: 14px;
+  font-weight: 700;
+  font-family: 'DM Sans', sans-serif;
+  cursor: pointer;
+  transition: background .2s;
+}
+
+.ftray-apply-btn:hover { background: var(--gold-dark); }
+
+/* ── DESKTOP: centred dialog instead of bottom-sheet ── */
+/* ── DESKTOP: slightly wider side drawer, same left/right slide direction ── */
+@media(min-width: 701px) {
+  .ftray-sheet {
+    max-width: 400px;
+  }
+}
+
+/* ── MOBILE: tighter spacing to match the compact filter bar pattern ── */
+@media(max-width: 700px) {
+  .fs-bar { margin: .55rem .9rem; border-radius: 12px; }
+  .fs-btn { padding: 10px 8px; font-size: 12px; gap: 6px; }
+  .fs-icon { width: 19px; height: 19px; }
+  .fs-icon svg { width: 10px; height: 10px; }
+  .ftray-head { padding: .85rem 1.1rem .65rem; }
+  .ftray-body { padding: .85rem 1.1rem; }
+  .ftray-foot { padding: .75rem 1.1rem; }
+  .ftray-section-label { flex-basis: 56px; font-size: 11px; }
+}

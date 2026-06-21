@@ -35,6 +35,7 @@
   <link rel="stylesheet" href="css/components.css">
   <link rel="stylesheet" href="css/promo.css">
   <link rel="stylesheet" href="css/checkout.css">
+  <link rel="stylesheet" href="css/filter-tray.css">
   <link rel="stylesheet" href="css/responsive.css">
 </head>
 
@@ -444,6 +445,55 @@
     </svg>
   </a>
 
+  <!-- ==================== SHARED FILTER / SORT TRAY ====================
+       One unified tray reused by every category page. Populated dynamically
+       by js/filter-tray.js based on the active category's products. -->
+  <div class="ftray-overlay" id="ftray-overlay" onclick="ftrayOverlayClick(event)">
+    <div class="ftray-sheet" id="ftray-sheet" role="dialog" aria-modal="true">
+      <div class="ftray-head">
+        <div class="ftray-title" id="ftray-title">Filter</div>
+        <button class="ftray-close" onclick="closeFilterTray()" aria-label="Close">&#x2715;</button>
+      </div>
+      <div class="ftray-body" id="ftray-body">
+        <!-- FILTER MODE: Price (left) + Type (right/below) -->
+        <div class="ftray-panel" id="ftray-panel-filter">
+          <div class="ftray-section-row">
+            <div class="ftray-section-label">Price</div>
+            <div class="ftray-checklist" id="ftray-price-list">
+              <label class="ftray-check"><input type="checkbox" value="0-299"><span>₹0 – ₹299</span></label>
+              <label class="ftray-check"><input type="checkbox" value="300-500"><span>₹300 – ₹500</span></label>
+              <label class="ftray-check"><input type="checkbox" value="501-1000"><span>₹501 – ₹1000</span></label>
+              <label class="ftray-check"><input type="checkbox" value="1000-1500"><span>₹1000 – ₹1500</span></label>
+              <label class="ftray-check"><input type="checkbox" value="1500-2000"><span>₹1500 – ₹2000</span></label>
+              <label class="ftray-check"><input type="checkbox" value="2000-up"><span>₹2000 & above</span></label>
+            </div>
+          </div>
+          <div class="ftray-divider"></div>
+          <div class="ftray-section-row">
+            <div class="ftray-section-label">Type</div>
+            <div class="ftray-checklist" id="ftray-type-list">
+              <!-- populated dynamically from category subcategories -->
+            </div>
+          </div>
+        </div>
+        <!-- SORT MODE: single-select list -->
+        <div class="ftray-panel" id="ftray-panel-sort" style="display:none;">
+          <div class="ftray-radiolist" id="ftray-sort-list">
+            <label class="ftray-radio"><input type="radio" name="ftray-sort" value="relevance" checked><span>Relevance</span></label>
+            <label class="ftray-radio"><input type="radio" name="ftray-sort" value="newest"><span>Newest First</span></label>
+            <label class="ftray-radio"><input type="radio" name="ftray-sort" value="trending"><span>Trending First</span></label>
+            <label class="ftray-radio"><input type="radio" name="ftray-sort" value="price-asc"><span>Price: Low to High</span></label>
+            <label class="ftray-radio"><input type="radio" name="ftray-sort" value="price-desc"><span>Price: High to Low</span></label>
+          </div>
+        </div>
+      </div>
+      <div class="ftray-foot">
+        <button class="ftray-clear-btn" onclick="clearFilterTray()">Clear All</button>
+        <button class="ftray-apply-btn" id="ftray-apply-btn" onclick="applyFilterTray()">Apply</button>
+      </div>
+    </div>
+  </div>
+
   <!-- ==================== HOME PAGE ==================== -->
   <div class="page active" id="page-home">
 
@@ -744,6 +794,7 @@
   <script src="js/promo.js"></script>
   <script src="js/basket.js"></script>
   <script src="js/checkout.js"></script>
+  <script src="js/filter-tray.js"></script>
   <script src="js/product-render.js"></script>
   <script src="js/pdp.js"></script>
   <script src="js/main.js"></script>
