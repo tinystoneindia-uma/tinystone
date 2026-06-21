@@ -1,0 +1,39 @@
+/* ════════════════════════════════════════════════════════════
+   RESPONSIVE.CSS
+   Consolidated media queries that cut across multiple
+   feature files (layout.css, pages.css, components.css).
+   Kept together here for predictable cascade order —
+   always loaded LAST so these overrides win.
+   ════════════════════════════════════════════════════════════ */
+
+    /* ── MEDIA QUERIES ── */
+    @media(max-width:700px) {
+      body { padding-top: 100px; }
+      nav { padding: 0 1rem; height: 64px; top: 36px; }
+      .desktop-nav-wrap, .ig-btn { display: none; }
+      .mob-ham-btn { display: flex; }
+      .mobile-bottom-nav { display: block; }
+      .prod-grid { grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 12px; }
+      .cat-grid { grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 10px; }
+      .cat-group-icon { width: 38px; height: 38px; font-size: 1.1rem; border-radius: 11px; }
+      .cat-group-header { gap: 10px; margin-bottom: 1.1rem; }
+      .section { padding: 2.5rem 1rem; }
+      .featured-banner { flex-direction: column; margin: 0 1rem; padding: 2rem 1.5rem; text-align: center; }
+      .fb-icons { font-size: 2.5rem; }
+      .wa-community { margin: 0 1rem; padding: 1.8rem 1.2rem; }
+      .footer-grid { grid-template-columns: 1fr 1fr; gap: 1.5rem; }
+      .footer-grid > div:first-child { grid-column: 1/-1; }
+      .footer-col:nth-child(4) { display: none; } /* Help */
+      .footer-col:nth-child(5) { display: none; } /* Follow Us */
+      .hiw-grid { grid-template-columns: 1fr; }
+      .pdp-layout { grid-template-columns: 1fr; padding: 1rem 1rem 96px; }
+      #page-pdp { padding-bottom: 88px; }
+      .basket-drawer { top: auto; bottom: -100%; right: 0; left: 0; width: 100%; height: 92vh; border-radius: 22px 22px 0 0; transition: bottom .35s cubic-bezier(.4,0,.2,1); }
+      .basket-drawer.open { bottom: 0; }
+      .float-wa { bottom: 80px; width: 50px; height: 50px; }
+    }
+    @media(min-width:701px) and (max-width:1024px) {
+      .prod-grid { grid-template-columns: repeat(auto-fill, minmax(185px, 1fr)); }
+      .footer-grid { grid-template-columns: 1.6fr 1fr 1fr 1fr; }
+      .footer-col:nth-child(5) { display: none; } /* Follow Us */
+    }
